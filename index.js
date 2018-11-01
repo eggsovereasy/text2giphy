@@ -1,17 +1,19 @@
 const SlackBot = require('slackbots');
+const axios = require('axios');
+const config = require('./config');
 
 const bot = new SlackBot({
-    token: 'xoxb-468390490501-468193724722-woPtLvq47fOpoBRC3a0b7Bpg',
+    token: config.botToken,
     name: 'text2giphy'
 });
 
+const botParams = {
+    icon_emoji: ':cat:'
+}
+
 // start handler
 bot.on('start', () => {
-    const params = {
-        icon_emoji: ':cat:'
-    }
-
-    bot.postMessageToChannel('general', 'text2giphy online', params);
+    bot.postMessageToChannel('general', 'text2giphy online', botParams);
 });
 
 // message handler
@@ -19,12 +21,21 @@ bot.on('message', (data) => {
     if(data.type !== 'message') {
         return; // i only want messages
     }
-
-    handleMessage(data);
+    getGyph(data.text);
 });
 
-function handleMessage(msg) {
-    bot.postMessageToChannel('general_giphy', '/giphy ' + msg.text);
+// get the gif from giphy
+function getGyph(msg) {
+    var url = 'http://api.giphy.com/v1/gifs/translate?api_key=' + config.giphyApikey + '&s=' + msg;
+    axios.get(url)
+        .then(response => {
+            // post it to gif channel
+            bot.postMessageToChannel(
+                'general_giphy',
+                response.data.data.images.original.url,
+                botParams
+            )
+        })
 }
 
 // deal with error
