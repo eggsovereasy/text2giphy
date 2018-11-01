@@ -13,11 +13,12 @@ const botParams = {
 
 // start handler
 bot.on('start', () => {
-    bot.postMessageToChannel('general', 'text2giphy online', botParams);
+    bot.postMessageToChannel(config.giphyChannel, 'text2giphy online', botParams);
 });
 
 // message handler
 bot.on('message', (data) => {
+    // TODO: ignore messages posted by text2giphy or it could cause an infinite loop    
     if(data.type !== 'message') {
         return; // i only want messages
     }
@@ -31,7 +32,7 @@ function getGyph(msg) {
         .then(response => {
             // post it to gif channel
             bot.postMessageToChannel(
-                'general_giphy',
+                config.giphyChannel,
                 response.data.data.images.original.url,
                 botParams
             )
